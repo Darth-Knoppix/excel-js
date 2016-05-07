@@ -2,8 +2,10 @@
 var $table  = $('#xl-table');
 var $header = $('#xl-header');
 var $body   = $('#xl-body');
-
 var tableStore = {};
+
+var columns;
+var rows;
 
 function letter(num){
   var alpha = "A".charCodeAt(0);
@@ -34,10 +36,10 @@ function drawHeaderCell(h, index){
   return '<th>' + indexToLetter(index + 1) + '</th>';
 }
 //Create the table header
-function initGridHeader(h, columns){
+function initGridHeader(h, _columns){
   headList = [];
   headList.push('<th id="xl-row-index"></th>'); //Empty column header for row index
-  for(col = 0; col < columns; col++){
+  for(col = 0; col < _columns; col++){
     headList.push(drawHeaderCell(h, col));
   }
   h.append(headList.join(""));
@@ -49,12 +51,12 @@ function drawBodyCell(b, column, row){
 }
 
 //Create table body cells
-function initGridBody(b, columns, rows){
+function initGridBody(b, _columns, _rows){
   bodyList = [];
-  for(row = 0; row < columns; row++){
+  for(row = 0; row < _rows; row++){
     bodyList.push('<tr>');
     bodyList.push('<td>' + (row + 1) + '</td>'); //Index for row
-    for(col = 0; col < rows; col++){
+    for(col = 0; col < _columns; col++){
       bodyList.push(drawBodyCell(b, col, row));
     }
     bodyList.push('</tr>');
@@ -62,17 +64,50 @@ function initGridBody(b, columns, rows){
   b.append(bodyList.join(""));
 }
 
-//Create initial grid
-function initGrid(columns, rows){
-  initGridHeader($header, columns);
-  initGridBody($body, columns, rows);
+function loadSavedData(){
+  $.each(tableStore, function(id, value){
+    $('#' + id).text(value);
+  });
 }
 
-$body.keypress(function(){
-  console.log('KEY');
+//Create initial grid
+function initGrid(_columns, _rows){
+  initGridHeader($header, _columns);
+  initGridBody($body, _columns, _rows);
+}
+
+/*
+  Listeners
+*/
+
+//Update tableStore to save values
+$body.keyup(function(e){
+  console.log(e.which);
+
+  //Don't update if tab pressed
+  if(e.which == 9){
+    return
+  }
+  tableStore[e.target.id] = e.target.innerText;
+  console.log(tableStore);
 });
 
+//Resfresh button
+$('#xl-action-refresh').click(function(e){
+  $header.empty();
+  $body.empty();
+  initGrid(columns, rows);
+  loadSavedData();
+});
+
+
+//Init
 $(document).ready(function() {
   console.log("INIT");
-  initGrid(100, 100);
+
+  //Get table size from data attrib or default to 100
+  columns = $table.data('columns') || 100;
+  rows    = $table.data('rows') || 100;
+
+  initGrid(columns, rows);
 });
