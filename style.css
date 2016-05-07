@@ -1,0 +1,44 @@
+/*
+  Style table to look like excel
+*/
+
+#xl-table{
+  border-collapse: collapse;
+}
+
+#xl-header{
+
+}
+
+#xl-header th{
+  min-width:72px;
+  border: 1px solid #6B6B6B;
+  border-top: none;
+}
+
+#xl-body{
+
+}
+
+#xl-body tr{
+
+}
+
+#xl-body tr td{
+  border: 1px solid #ccc;
+}
+
+#xl-body tr td:focus{
+  outline: #298E28 solid 2px;
+}
+
+#xl-body tr td:first-child{
+  border: 1px solid #6B6B6B;
+  border-left: none;
+  text-align: center;
+}
+
+th#xl-row-index{
+  min-width:25px;
+  border-left: none;
+}
