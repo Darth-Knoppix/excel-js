@@ -27,7 +27,7 @@ function indexToLetter(index){
   return result;
 }
 
-//Create a single table header cell
+//Draw a single table header cell
 function drawHeaderCell(h, index){
   h.append('<th>' + indexToLetter(index + 1) + '</th>');
 }
@@ -38,15 +38,28 @@ function initGridHeader(h, columns){
   }
 }
 
-//Create table cells
-function initGridBody(b, rows){
+//Draw a single body cell
+function drawBodyCell(b, column, row){
+  return '<td contenteditable="true" id="'+ indexToLetter(column + 1) + (row + 1) +'">' + '</td>';
+}
 
+//Create table body cells
+function initGridBody(b, columns, rows){
+  bodyList = [];
+  for(row = 0; row < columns; row++){
+    bodyList.push('<tr>');
+    for(col = 0; col < rows; col++){
+      bodyList.push(drawBodyCell(b, col, row));
+    }
+    bodyList.push('</tr>');
+  }
+  b.append(bodyList.join(""));
 }
 
 //Create initial grid
 function initGrid(columns, rows){
   initGridHeader($header, columns);
-  initGridBody($body, rows);
+  initGridBody($body, columns, rows);
 }
 
 $(document).ready(function() {
