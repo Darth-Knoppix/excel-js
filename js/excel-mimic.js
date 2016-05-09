@@ -66,13 +66,26 @@ function initGridBody(b, _columns, _rows){
   b.append(bodyList.join(""));
 }
 
-function loadSavedData(){
-  var cell;
+function calcAllFormulas(){
+  console.log('UPDATING');
+  var $cell;
+  var form;
   $.each(tableStore, function(id, value){
-    cell = $('#' + id);
-    cell.text(value['value']);
-    cell.attr('class', value['style']);
-    checkFormula(cell);
+    $cell = $('#' + id);
+    form = $cell.attr('data-formula');
+    if(typeof form !== typeof undefined){
+      $cell.text(calcFormula(form));
+    }
+  });
+}
+
+function loadSavedData(){
+  var $cell;
+  $.each(tableStore, function(id, value){
+    $cell = $('#' + id);
+    $cell.text(value['value']);
+    $cell.attr('class', value['style']);
+    checkFormula($cell);
   });
 }
 
@@ -159,6 +172,7 @@ $body.keyup(function(e){
   switch(key){
     //Don't update if tab pressed
     case 9:
+      calcAllFormulas();
       return;
     case 37: //Selector left keyboard
       $selected = adjacentCell(e.target.id, 'left').focus();
@@ -175,7 +189,7 @@ $body.keyup(function(e){
     default:
       $selected = $(e.target);
       saveCell($selected);
-      console.log(tableStore);
+      // console.log(tableStore);
       
       return;
   }
@@ -184,6 +198,7 @@ $body.keyup(function(e){
 //Look for formula on cell change
 $body.focusout(function(e){
   checkFormula($(e.target));
+  calcAllFormulas();
 });
 
 //Action on cell focus
