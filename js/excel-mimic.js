@@ -3,6 +3,7 @@
 var $table  = $('#xl-table');
 var $header = $('#xl-header');
 var $body   = $('#xl-body');
+var $selected;
 var tableStore = {};
 
 var columns;
@@ -66,9 +67,20 @@ function initGridBody(b, _columns, _rows){
 }
 
 function loadSavedData(){
+  var cell;
   $.each(tableStore, function(id, value){
-    $('#' + id).text(value);
+    cell = $('#' + id);
+    cell.text(value['value']);
+    cell.attr('class', value['style']);
+    checkFormula(cell);
   });
+}
+
+function saveCell(cell){
+  tableStore[cell.attr('id')] = {
+    'value': cell.text(), 
+    'style': cell.attr('class')
+  };
 }
 
 //Create initial grid
@@ -77,19 +89,8 @@ function initGrid(_columns, _rows){
   initGridBody($body, _columns, _rows);
 }
 
-function addCells(vars){
-  console.log('ADDITION');
-  var output = 0;
-  $.each(vars, function(index, id){
-    console.log($('#' + id).val());
-    output += parseFloat($('#' + id).innerText);
-  });
-  return output;
-}
-
 function calcFormula(formula){
   formula = formula.substr(1);
-  console.log('FORMULA');
   var variables = formula.match(/[A-Z]\d/g);
   var ref;
 
@@ -106,19 +107,43 @@ function adjacentCell(origin, direction){
   var column = origin.match(/[A-Z]+/);
   var destination;
 
-  console.log(column);
+  // console.log(column);
 
   switch(direction){
+    case 'left':
+      destination = $('#' + origin).prev();
+      break;
+    case 'right':
+      destination = $('#' + origin).next();
+      break;
     case 'up':
-      destination = column + (row - 1)
+      destination = $('#' + column + (row - 1));
       break;
     case 'down':
-      destination = column + (row + 1)
+      destination = $('#' + column + (row + 1));
       break;
     default:
       break;
   }
   return destination;
+}
+
+//Check if formula present in cell
+function checkFormula(cell){
+  if(cell.text()[0] !== '='){
+    return;
+  }
+
+  cell.attr('data-formula', cell.text());
+  cell.text(calcFormula(cell.text()));
+}
+
+function toggleActionButton(style){
+  if($selected.hasClass(style)){
+    $('#xl-action-' + style).addClass('depressed');
+  }else{
+    $('#xl-action-' + style).removeClass('depressed');
+  }
 }
 
 /*
@@ -127,7 +152,7 @@ function adjacentCell(origin, direction){
 
 //Update tableStore to save values
 $body.keyup(function(e){
-  console.log(e.which);
+  // console.log(e.which);
 
   var key = e.which;
 
@@ -135,53 +160,80 @@ $body.keyup(function(e){
     //Don't update if tab pressed
     case 9:
       return;
-
-    //Cursor left on left keyboard
-    case 38:
-      $('#' + adjacentCell(e.target.id, 'up')).focus();
+    case 37: //Selector left keyboard
+      $selected = adjacentCell(e.target.id, 'left').focus();
       break;
-    case 40:
-      $('#' + adjacentCell(e.target.id, 'down')).focus();
+    case 38: //Selector up keyboard
+      $selected = adjacentCell(e.target.id, 'up').focus();
       break;
-
+    case 39: //Selector right keyboard
+      $selected = adjacentCell(e.target.id, 'right').focus();
+      break;
+    case 40: //Selector down keyboard
+      $selected = adjacentCell(e.target.id, 'down').focus();
+      break;
     default:
+      $selected = $(e.target);
+      saveCell($selected);
+      console.log(tableStore);
+      
       return;
   }
-
-  tableStore[e.target.id] = e.target.innerText;
-  // console.log(tableStore);
 });
 
 //Look for formula on cell change
 $body.focusout(function(e){
-  // console.log(e.target.id);
-  if(e.target.innerText[0] !== '='){
-    return;
-  }
-
-  e.target.setAttribute('data-formula', e.target.innerText);
-  e.target.innerText = calcFormula(e.target.innerText);
+  checkFormula($(e.target));
 });
 
-//Show formula if exists
+//Action on cell focus
 $body.focusin(function(e){
+  $selected = $(e.target);
+
+  toggleActionButton('bold');
+  toggleActionButton('italic');
+  toggleActionButton('underline');
 
   //Do nothing if no formula exists
-  var formulaAttribute = $(e.target).attr('data-formula');
+  var formulaAttribute = $selected.attr('data-formula');
   if(typeof formulaAttribute === typeof undefined || formulaAttribute === false){
     return;
   }
 
   //Display formula
-  e.target.innerText = $(e.target).attr('data-formula');
+  $selected.text($selected.attr('data-formula'));
 });
 
-//Resfresh button
+//Refresh button
 $('#xl-action-refresh').click(function(e){
   $header.empty();
   $body.empty();
   initGrid(columns, rows);
   loadSavedData();
+});
+
+//Bold button
+$('#xl-action-bold').click(function(e){
+  $selected.focus();
+  $(e.target).toggleClass('depressed');
+  $selected.toggleClass('bold');
+  saveCell($selected);
+});
+
+//Italics button
+$('#xl-action-italic').click(function(e){
+  $selected.focus();
+  $(e.target).toggleClass('depressed');
+  $selected.toggleClass('italic');
+  saveCell($selected);
+});
+
+//Bold button
+$('#xl-action-underline').click(function(e){
+  $selected.focus();
+  $(e.target).toggleClass('depressed');
+  $selected.toggleClass('underline');
+  saveCell($selected);
 });
 
 //Init

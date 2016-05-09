@@ -42,3 +42,48 @@ th#xl-row-index{
   min-width:25px;
   border-left: none;
 }
+
+.xl-container{
+  font-family: sans-serif;
+}
+
+.actions > .xl-button, .actions > .title{
+  display:inline-block;
+}
+
+.actions > .title{
+  margin-right:1em;
+}
+
+.xl-button{
+  border-radius: 5px;
+  background-color: #ccc;
+  padding:7px;
+  border:1px solid #666;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.xl-button:hover{
+  background-color: #ececec;
+}
+
+.xl-button:active{
+  background-color: #ccc;
+  border: 1px solid #999;
+}
+.xl-button.depressed{
+  background-color: #298E28;
+  color: #fff;
+}
+
+#xl-body .bold{
+  font-weight: bold;
+}
+
+#xl-body .italic{
+  font-style: italic;
+}
+#xl-body .underline{
+  text-decoration: underline;
+}
