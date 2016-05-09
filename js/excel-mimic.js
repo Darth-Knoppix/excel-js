@@ -1,4 +1,5 @@
 //Basic excel style sheet in JS and HTML5\
+
 var $table  = $('#xl-table');
 var $header = $('#xl-header');
 var $body   = $('#xl-body');
@@ -20,7 +21,7 @@ function indexToLetter(index){
   if (index <= alphabetLength){
     result = letter(index)
   }else{
-    var mod   = index % alphabetLength;
+    var mod = index % alphabetLength;
     var iterations  = Math.floor(index / alphabetLength);
     if(mod === 0){
       result = letter(iterations - 1) + letter(alphabetLength);
@@ -76,20 +77,68 @@ function initGrid(_columns, _rows){
   initGridBody($body, _columns, _rows);
 }
 
+function addCells(vars){
+  console.log('ADDITION');
+  var output = 0;
+  $.each(vars, function(index, id){
+    console.log($('#' + id).val());
+    output += parseFloat($('#' + id).innerText);
+  });
+  return output;
+}
+
+function calcFormula(formula){
+  formula = formula.substr(1);
+  console.log('FORMULA');
+  var variables = formula.match(/[A-Z]\d/g);
+  var ref;
+
+  $.each(variables, function(index, id){
+    ref = new RegExp(id, "g");
+    formula = formula.replace(ref, $('#' + id).text());
+  });
+
+  return evalExpression(formula);
+}
+
 /*
   Listeners
 */
 
 //Update tableStore to save values
 $body.keyup(function(e){
-  console.log(e.which);
+  // console.log(e.which);
 
   //Don't update if tab pressed
   if(e.which == 9){
-    return
+    return;
   }
   tableStore[e.target.id] = e.target.innerText;
-  console.log(tableStore);
+  // console.log(tableStore);
+});
+
+//Look for formula on cell change
+$body.focusout(function(e){
+  // console.log(e.target.id);
+  if(e.target.innerText[0] !== '='){
+    return;
+  }
+
+  e.target.setAttribute('data-formula', e.target.innerText);
+  e.target.innerText = calcFormula(e.target.innerText);
+});
+
+//Show formula if exists
+$body.focusin(function(e){
+
+  //Do nothing if no formula exists
+  var formulaAttribute = $(e.target).attr('data-formula');
+  if(typeof formulaAttribute === typeof undefined || formulaAttribute === false){
+    return;
+  }
+
+  //Display formula
+  e.target.innerText = $(e.target).attr('data-formula');
 });
 
 //Resfresh button
@@ -99,7 +148,6 @@ $('#xl-action-refresh').click(function(e){
   initGrid(columns, rows);
   loadSavedData();
 });
-
 
 //Init
 $(document).ready(function() {
