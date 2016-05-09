@@ -101,18 +101,53 @@ function calcFormula(formula){
   return evalExpression(formula);
 }
 
+function adjacentCell(origin, direction){
+  var row = parseInt(origin.match(/[0-9]+$/));
+  var column = origin.match(/[A-Z]+/);
+  var destination;
+
+  console.log(column);
+
+  switch(direction){
+    case 'up':
+      destination = column + (row - 1)
+      break;
+    case 'down':
+      destination = column + (row + 1)
+      break;
+    default:
+      break;
+  }
+  return destination;
+}
+
 /*
   Listeners
 */
 
 //Update tableStore to save values
 $body.keyup(function(e){
-  // console.log(e.which);
+  console.log(e.which);
 
-  //Don't update if tab pressed
-  if(e.which == 9){
-    return;
+  var key = e.which;
+
+  switch(key){
+    //Don't update if tab pressed
+    case 9:
+      return;
+
+    //Cursor left on left keyboard
+    case 38:
+      $('#' + adjacentCell(e.target.id, 'up')).focus();
+      break;
+    case 40:
+      $('#' + adjacentCell(e.target.id, 'down')).focus();
+      break;
+
+    default:
+      return;
   }
+
   tableStore[e.target.id] = e.target.innerText;
   // console.log(tableStore);
 });
