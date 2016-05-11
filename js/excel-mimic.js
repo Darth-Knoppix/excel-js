@@ -112,7 +112,7 @@ function calcFormula(formula){
     formula = formula.replace(ref, $('#' + id).text());
   });
 
-  return evalExpression(formula);
+  return Shunt.parse(formula);
 }
 
 function adjacentCell(origin, direction){
